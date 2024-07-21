@@ -92,3 +92,128 @@ const pauseBtn = document.querySelector('i.fa-pause');
 const repeatBtn = document.querySelector('span.fa-redo');
 const volumeBtn = document.querySelector('span.fa-volume-up');
 const volumeSlider = document.querySelector('.volume-slider');
+
+
+// playBtn click event
+
+playBtn.addEventListener('click', () => {
+    music.play();
+    playBtn.classList.remove('active');
+    pauseBtn.classList.add('active');
+})
+
+
+// pauseBtn click event
+
+pauseBtn.addEventListener('click', () => {
+    music.pause();
+    pauseBtn.classList.remove('active');
+    playBtn.classList.add('active');
+})
+
+// funtion for setting up music
+
+const setMusic = (i) => {
+    seekBar.value = 0;
+    let song = songs[i];
+    currentMusic = i;
+
+    music.src = song.path;
+
+    songName.innerHTML = song.name;
+    artistName.innerHTML = song.artist;
+    coverImage.src = song.cover;
+
+    setTimeout(() => {
+        seekBar.max = music.duration;
+        musicDuration.innerHTML = formatTime(music.duration);
+    }, 300);
+    currentMusicTime.innerHTML = '00 : 00';
+    queue.forEach(item => item.classList.remove('active'));
+    queue[currentMusic].classList.add('active');
+}
+
+setMusic(0);
+
+// format duration in 00 : 00 format
+
+const formatTime = (time) => {
+    let min = Math.floor(time / 60);
+    if(min < 10){
+        min = `0` + min;
+    }
+
+    let sec = Math.floor(time % 60);
+    if(sec < 10){
+        sec = `0` + sec;
+    }
+
+    return `${min} : ${sec}`;
+}
+
+// seekbar events
+
+setInterval(() => {
+    seekBar.value = music.currentTime;
+    currentMusicTime.innerHTML = formatTime(music.currentTime);
+    if(Math.floor(music.currentTime) == Math.floor(seekBar.max)){
+        if(repeatBtn.className.includes('active')){
+            setMusic(currentMusic);
+            playBtn.click();
+        } else{
+            forwardBtn.click();
+        }
+    }
+}, 500)
+
+seekBar.addEventListener('change', () => {
+    music.currentTime = seekBar.value;
+})
+
+//  forward btn
+
+forwardBtn.addEventListener('click', () => {
+    if(currentMusic >= songs.length - 1){
+        currentMusic = 0;
+    } else{
+        currentMusic++;
+    }
+    setMusic(currentMusic);
+    playBtn.click();
+})
+
+// backward btn
+
+backwardBtn.addEventListener('click', () => {
+    if(currentMusic <= 0){
+        currentMusic = songs.length - 1;
+    } else{
+        currentMusic--;
+    }
+    setMusic(currentMusic);
+    playBtn.click();
+})
+
+// repeat button
+
+repeatBtn.addEventListener('click', () => {
+    repeatBtn.classList.toggle('active');
+})
+
+// volume section
+
+volumeBtn.addEventListener('click', () => {
+    volumeBtn.classList.toggle('active');
+    volumeSlider.classList.toggle('active');
+})
+
+volumeSlider.addEventListener('input', () => {
+    music.volume = volumeSlider.value;
+})
+
+queue.forEach((item, i) => {
+    item.addEventListener('click', () => {
+        setMusic(i);
+        playBtn.click();
+    })
+})
